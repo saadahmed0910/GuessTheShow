@@ -1,1 +1,0 @@
-SELECT * FROM scraped_anime_table
