@@ -9,7 +9,7 @@ import math
 
 try:
     # This involved passwords specific to my database, I have uploaded a csv version instead in case anyone would want to use it
-    cnx = mysql.connector.connect(user = 'root', password = 'Maximum60!', host = 'localhost', database = 'anime')
+    cnx = mysql.connector.connect(user = 'root', password = '', host = 'localhost', database = 'anime')
     print ("Connection Established")
 
 except mysql.connector.Error as err:
@@ -19,7 +19,7 @@ except mysql.connector.Error as err:
 hostname= "localhost"
 database= "anime"
 username= "root"
-password= "Maximum60!"
+password= ""
 
 
 
