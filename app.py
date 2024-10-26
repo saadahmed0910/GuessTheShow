@@ -1,11 +1,12 @@
-from flask import Flask, render_template, session, request, redirect, url_for
-from connection import english_drop, score_cleaned, type_cleaned, aired_cleaned, episodes_cleaned, random_letter
+from flask import Flask, render_template, session, request, redirect, url_for, jsonify
+from connection import english_drop, score_cleaned, type_cleaned, aired_cleaned, episodes_cleaned, random_letter_as_String, genres_cleaned, english_names
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 #name_drop = name_drop.lower()
-hints = [episodes_cleaned, type_cleaned, aired_cleaned, score_cleaned]
+hints = [episodes_cleaned, type_cleaned, aired_cleaned, score_cleaned, genres_cleaned]
 
 @app.route('/')
 def game():
@@ -13,7 +14,7 @@ def game():
     if 'guessed_words' not in session:
         session['guessed_words'] = [] #initialize a guessed words list 
     if 'hints_displayed' not in session:
-        session['hints_displayed'] = [False, False, False, False] #Initializes the hints list
+        session['hints_displayed'] = [False, False, False, False, False] #Initializes the hints list
         
     
     guessed_words = session['guessed_words']
@@ -26,7 +27,7 @@ def game():
     hints_displayed = session['hints_displayed']
 
     return render_template('game.html', display_word=english_drop, guessed_words=guessed_words, correct_guess=correct_guess, guess_checker=guess_checker, 
-                           hints=hints, hints_displayed=hints_displayed, random_letter=random_letter, length=length)
+                           hints=hints, hints_displayed=hints_displayed, random_letter_as_String=random_letter_as_String, length=length)
 
 @app.route('/guess', methods = ['POST'])
 def guess():
@@ -42,23 +43,36 @@ def guess():
         # Check if the guessed word is correct or incorrect
         if guessed_word == english_drop:
             session['guess_checker'] = f"'{guessed_word}' is correct, Congratulations!" 
+
+        elif guessed_word == english_drop.lower():
+            session['guess_checker'] = f"'{guessed_word}' is correct, Congratulations!"
+
         else:
             session['guess_checker'] = f"'{guessed_word}' is incorrect. Try again!"
     
     return redirect(url_for('game'))  # Redirect back to the game page
 
 
-
-
 @app.route('/hint/<int:hint_id>', methods=['POST'])
 def hint (hint_id):
     if 'hints_displayed' not in session:
-        session['hints_displayed'] = [False, False, False, False]
+        session['hints_displayed'] = [False, False, False, False, False]
 
     session['hints_displayed'][hint_id] = True
     return redirect(url_for('game'))
 
+show_names = english_names.str.strip().to_list()
+
+
+@app.route('/autocomplete', methods=['GET'])
+def autocomplete():
+
+    query = request.args.get('q', '')  # Get the query parameter
+    # Filter the list based on the query
+    filtered_names = [name for name in show_names if query.lower() in name.lower()]
+
+    return jsonify(filtered_names)
+
 
 if __name__ == '__main__':
     app.run(debug = True)
-    
